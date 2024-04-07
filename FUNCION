@@ -1,0 +1,58 @@
+#include <stm32f4xx.h>
+
+char dato[12] = {"MANEJO DE LA : "};
+char datooo[12] = {"PANTALLA LCD : "};
+
+char clear = 0x01;
+char set = 0x38;
+char disp_on = 0x0E;
+char mode = 0x06;
+char ddram1l = 0x80;//linea 1
+char ddram2l = 0xC0;//linea 2
+
+void send_comando(char a)                                      //LEE EL DATO PARA LA LCD.
+{
+	GPIOB -> ODR = a | (1UL<<9);
+	for(int dl = 0; dl<10000; dl++);//RETARDO.
+	GPIOB -> ODR &=~(1UL<<9);
+}
+
+void send_dato(char b)                                       //ESCRIBE EL DATO EN LA LCD.
+{
+	GPIOB -> ODR = b | (3<<8);
+	for(int dl = 0; dl<10000; dl++);//RETARDO.
+	GPIOB -> ODR &=~(1UL<<9);
+}
+
+
+
+int main(void)
+{
+	RCC -> AHB1ENR = 6; //ACTIVACION PUERTOS B Y C.
+	GPIOB -> MODER = 0x55555;//SALIDAS DE LA LCD 0-9.
+	send_comando(clear);
+	for(int dl = 0; dl<10000; dl++);//RETARDO.
+	send_comando(set);
+	send_comando(disp_on);
+	send_comando(mode);
+	
+	while(1)
+	{
+////////////////////////////////////////////////mostrar linea 1
+		send_comando(ddram1l+2);//MANDA EL DATO.}   //ddram1l + corrimiento
+		for(int i =0; i<12; i++)
+		{
+		send_dato(dato[i]);//ESCRIBE EL DATO.
+		}
+		
+////////////////////////////////////////////////mostrar linea 2
+			send_comando(ddram2l+2);//MANDA EL DATO.}
+			for(int i =0; i<12; i++)
+			{
+			send_dato(datooo[i]);//ESCRIBE EL DATO.
+		}
+	}
+	
+	
+	
+}
